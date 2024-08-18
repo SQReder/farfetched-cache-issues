@@ -2,6 +2,7 @@ import {
   createQuery,
   cache,
   inMemoryCache,
+  localStorageCache
   concurrency,
   onAbort,
 } from "@farfetched/core";
@@ -31,6 +32,7 @@ cachedQuery.__.meta.sid = "cool SID";
 
 const startJob = createEvent<number>();
 
+const purgeCache = createEvent();
 const hit = createEvent<{ key: string }>();
 const miss = createEvent<{ key: string }>();
 
@@ -38,9 +40,10 @@ hit.watch((payload) => console.log("hit", payload));
 miss.watch((payload) => console.log("miss", payload));
 
 cache(cachedQuery, {
-  adapter: inMemoryCache({ observability: { hit, miss } }),
+  adapter: localStorageCache({ observability: { hit, miss } }),
   staleAfter: "1m",
   humanReadableKeys: true,
+  purge: purgeCache,
 });
 concurrency(cachedQuery, { strategy: "TAKE_LATEST" });
 
@@ -52,7 +55,7 @@ sample({
 cachedQuery.start.watch((id) => console.log(`🚀 Job ${id} scheduled`));
 
 cachedQuery.finished.finally.watch((data) =>
-  console.log(`🎉 Job ${data.params} resulted with ${data.status}`)
+  console.log(`🎉 Job ${data.params} resulted with ${data.status}`),
 );
 cachedQuery.aborted.watch((data) => {
   console.log(`💀 Job ${data.params} was aborted`);
@@ -103,4 +106,10 @@ const button = document.getElementById("start");
 
 button?.addEventListener("click", () => {
   main();
+});
+
+const purgeButton = document.getElementById("purgeButton");
+
+purgeButton?.addEventListener("click", () => {
+  purgeCache();
 });
