@@ -8,7 +8,7 @@
     "build": "parcel build index.html"
   },
   "dependencies": {
-    "parcel-bundler": "1.6.1",
+    "parcel-bundler": "1.12.5",
     "@farfetched/core": "^0.12.6",
     "effector": "^23.2.2"
   },
